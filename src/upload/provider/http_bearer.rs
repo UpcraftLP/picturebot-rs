@@ -30,15 +30,15 @@ impl HttpBearerUploader {
             .user_agent(user_agent)
             .timeout(std::time::Duration::from_secs(20))
             .build()
-            .context("Failed to build HTTP client")?.into();
+            .context("Failed to build HTTP client")?;
 
         let mut upload_url_mut = upload_url.clone();
-        if upload_url_mut.ends_with("/") {
+        if upload_url_mut.ends_with('/') {
             upload_url_mut.pop();
         }
 
         let mut frontend_url_mut = frontend_url.clone();
-        if frontend_url_mut.ends_with("/") {
+        if frontend_url_mut.ends_with('/') {
             frontend_url_mut.pop();
         }
 
@@ -54,14 +54,14 @@ impl HttpBearerUploader {
             .context("UPLOAD_URL is not set")?;
 
         let mut frontend_url = env::var("UPLOAD_FRONTEND_URL").unwrap_or(upload_url.clone());
-        if frontend_url.ends_with("/") {
+        if frontend_url.ends_with('/') {
             frontend_url.pop();
         }
         let auth_header_name = env::var("UPLOAD_AUTH_HEADER_NAME").ok();
         let auth_header_value = env::var("UPLOAD_AUTH_HEADER_VALUE")
             .context("UPLOAD_AUTH_HEADER_VALUE is not set")?;
 
-        Ok(HttpBearerUploader::new(upload_url, frontend_url, auth_header_name, auth_header_value)?)
+        HttpBearerUploader::new(upload_url, frontend_url, auth_header_name, auth_header_value)
     }
 }
 

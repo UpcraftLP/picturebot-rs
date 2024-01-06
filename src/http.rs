@@ -13,7 +13,7 @@ pub(crate) fn get_user_agent() -> String {
             }
             let os_family = build_info::CFG_FAMILY;
             let mut user_agent = format!("PictureBot/{version} ({os_family};) {repo_url}");
-            if let Some(contact) = env::var("UPLOAD_CONTACT_INFO").ok() {
+            if let Ok(contact) = env::var("UPLOAD_CONTACT_INFO") {
                 user_agent = format!("{user_agent} ({contact})");
             }
             USER_AGENT = Some(user_agent);

@@ -19,9 +19,9 @@ impl UploadValidator {
         let allowed_file_types: HashMap<String, Option<usize>> = match env::var("DISCORD_ALLOWED_FILE_EXTENSIONS").ok() {
             None => HashMap::with_capacity(0),
             Some(value) => {
-                let mut map = HashMap::with_capacity(value.split(",").count());
-                for file_type in value.split(",") {
-                    match file_type.split_once("=") {
+                let mut map = HashMap::with_capacity(value.split(',').count());
+                for file_type in value.split(',') {
+                    match file_type.split_once('=') {
                         None => {
                             map.insert(file_type.to_string(), None);
                         },
@@ -42,11 +42,11 @@ impl UploadValidator {
     }
 
     pub fn check(&self, path: &String, original: &String) -> Result<(), &str> {
-        let file_name = path.split("/").last().ok_or_else(|| "Failed to get file name")?;
-        let file_extension = file_name.split(".").last().ok_or_else(|| "Invalid file name or extension")?;
+        let file_name = path.split('/').last().ok_or("Failed to get file name")?;
+        let file_extension = file_name.split('.').last().ok_or("Invalid file name or extension")?;
 
-        let original_file_name = original.split("/").last().ok_or_else(|| "Failed to get attachment file name")?;
-        let original_file_extension = original_file_name.split(".").last().ok_or_else(|| "Invalid attachment file name or extension")?;
+        let original_file_name = original.split('/').last().ok_or("Failed to get attachment file name")?;
+        let original_file_extension = original_file_name.split('.').last().ok_or("Invalid attachment file name or extension")?;
 
         if file_extension != original_file_extension {
             return Err("Target file type does not match attachment file type");

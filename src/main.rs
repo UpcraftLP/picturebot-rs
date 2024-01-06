@@ -13,8 +13,8 @@ pub mod build_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));
 }
 
-static mut VERSION: &'static str = env!("CARGO_PKG_VERSION");
-static mut ENVIRONMENT: &'static str = "development";
+static mut VERSION: &str = env!("CARGO_PKG_VERSION");
+static mut ENVIRONMENT: &str = "development";
 
 pub(crate) fn version() -> &'static str {
     unsafe { VERSION }
