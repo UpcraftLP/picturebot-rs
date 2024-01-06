@@ -41,7 +41,7 @@ pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Contex
     }
 
     let frontend_url = uploader.frontend_url(&filename);
-    if let Err(message) = validator.check(&frontend_url, &attachment.filename.to_ascii_lowercase()) {
+    if let Err(message) = validator.check(&frontend_url, &attachment.filename.to_ascii_lowercase(), attachment.size) {
         return ctx.respond().is_ephemeral(true).content(message).finish();
     }
 

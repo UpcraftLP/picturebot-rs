@@ -41,7 +41,7 @@ impl UploadValidator {
         })
     }
 
-    pub fn check(&self, path: &str, original: &str) -> Result<(), &str> {
+    pub fn check(&self, path: &str, original: &str, file_size: usize) -> Result<(), String> {
         let file_name = path.split('/').last().ok_or("Failed to get file name")?;
         let file_extension = file_name.split('.').last().ok_or("Invalid file name or extension")?;
 
@@ -49,12 +49,12 @@ impl UploadValidator {
         let original_file_extension = original_file_name.split('.').last().ok_or("Invalid attachment file name or extension")?;
 
         if file_extension != original_file_extension {
-            return Err("Target file type does not match attachment file type");
+            return Err("Target file type does not match attachment file type".to_string());
         }
 
         if let Some(max_length) = self.frontend_url_max_length {
             if path.len() > max_length {
-                return Err("File path too long!");
+                return Err("File path too long!".to_string());
             }
         }
 
@@ -63,13 +63,14 @@ impl UploadValidator {
 
             match self.allowed_file_types.get(file_ext_str) {
                 Some(opt) => {
-                    if let Some(max_length) = opt {
-                        if file_name.len() > *max_length {
-                            return Err("File name too long!");
+                    if let Some(max_size) = opt {
+                        let max_file_size = *max_size;
+                        if file_size > max_file_size {
+                            return Err(format!("File too big! Maximum allowed size is {}", human_bytes::human_bytes(max_file_size as f64)));
                         }
                     }
                 }
-                None => return Err("File type not allowed!"),
+                None => return Err("File type not allowed!".to_string()),
             }
         }
 
