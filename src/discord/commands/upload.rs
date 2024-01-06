@@ -82,7 +82,7 @@ pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Contex
                         .title("New upload")
                         .add_field(EmbedField::default()
                             .name("Discord User")
-                            .value(format!("`{user_id:width$}` <@{user_id}>", user_id = ctx.interaction.member.clone().map(|m| m.user.id).unwrap_or(0), width = 20))
+                            .value(format!("`{user_id}` <@{user_id}>", user_id = ctx.interaction.member.clone().map(|m| m.user.id).unwrap_or(0)))
                         )
                         .add_field(EmbedField::default()
                             .name("URL")
