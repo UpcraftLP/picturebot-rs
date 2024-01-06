@@ -27,9 +27,9 @@ pub enum Uploader {
 
 #[enum_dispatch]
 pub trait UploaderImpl {
-    async fn upload(&self, path: &String, bytes: Vec<u8>, content_type: &String) -> anyhow::Result<String>;
+    async fn upload(&self, path: &str, bytes: Vec<u8>, content_type: &str) -> anyhow::Result<String>;
 
-    fn frontend_url(&self, path: &String) -> String;
+    fn frontend_url(&self, path: &str) -> String;
 }
 
 impl Display for Uploader {

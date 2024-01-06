@@ -66,7 +66,7 @@ impl HttpBearerUploader {
 }
 
 impl UploaderImpl for HttpBearerUploader {
-    async fn upload(&self, path: &String, bytes: Vec<u8>, content_type: &String) -> anyhow::Result<String> {
+    async fn upload(&self, path: &str, bytes: Vec<u8>, content_type: &str) -> anyhow::Result<String> {
 
         let target_url = format!("{}/{}", self.upload_url, path);
 
@@ -87,7 +87,7 @@ impl UploaderImpl for HttpBearerUploader {
         Ok(self.frontend_url(path))
     }
 
-    fn frontend_url(&self, path: &String) -> String {
+    fn frontend_url(&self, path: &str) -> String {
         format!("{}/{}", self.frontend_url, path)
     }
 }

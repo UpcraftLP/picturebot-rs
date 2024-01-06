@@ -41,7 +41,7 @@ impl UploadValidator {
         })
     }
 
-    pub fn check(&self, path: &String, original: &String) -> Result<(), &str> {
+    pub fn check(&self, path: &str, original: &str) -> Result<(), &str> {
         let file_name = path.split('/').last().ok_or("Failed to get file name")?;
         let file_extension = file_name.split('.').last().ok_or("Invalid file name or extension")?;
 
