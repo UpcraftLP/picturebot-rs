@@ -79,6 +79,7 @@ pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Contex
 
                 let message = WebhookMessage {
                     username: Some("PictureBot".to_string()),
+                    avatar_url: bot.webhook_logo_url.clone(),
                     embeds: Some(vec![EmbedBuilder::default()
                         .title("New upload")
                         .add_field(EmbedField::default()

@@ -13,6 +13,7 @@ pub struct BotInfo {
     pub app_id: Snowflake,
     pub owner_id: Snowflake,
     pub webhooks: Option<Vec<Webhook>>,
+    pub webhook_logo_url: Option<String>,
 }
 
 pub(crate) async fn init() -> anyhow::Result<InteractionHandler> {
@@ -46,12 +47,20 @@ pub(crate) async fn init() -> anyhow::Result<InteractionHandler> {
             .collect::<Vec<Webhook>>()
         );
 
+    let mut webhook_logo_url = None;
+    if let Some(webhooks) = &webhooks {
+        log::info!("Parsed {} webhooks", webhooks.len());
+
+        webhook_logo_url = std::env::var("DISCORD_WEBHOOK_LOGO_URL").ok();
+    }
+
     let mut handler = InteractionHandler::new(app_id, public_key, Some(&token));
 
     handler.add_data(BotInfo {
         app_id,
         owner_id,
         webhooks,
+        webhook_logo_url,
     });
 
     commands::register_commands(&mut handler);
