@@ -30,7 +30,8 @@ pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Contex
 
     let desired_file_name = file_name_option.map(|o| o.value.clone()).unwrap_or_else(|| attachment.filename.clone());
 
-    let user_id_string = format!("{:0width$}", &ctx.interaction.member.clone().map(|m| m.user.id).unwrap_or(0), width = 20);
+    let user_id = &ctx.interaction.member.clone().map(|m| m.user.id).unwrap_or(0);
+    let user_id_string = format!("{:0width$}", user_id, width = 20);
     let prefix = &user_id_string[16..];
     assert_eq!(prefix.len(), 4, "Prefix must be 4 characters long");
 
@@ -82,7 +83,7 @@ pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Contex
                         .title("New upload")
                         .add_field(EmbedField::default()
                             .name("Discord User")
-                            .value(format!("`{user_id}` <@{user_id}>", user_id = ctx.interaction.member.clone().map(|m| m.user.id).unwrap_or(0)))
+                            .value(format!("`{user_id}` <@{user_id}>"))
                         )
                         .add_field(EmbedField::default()
                             .name("URL")
