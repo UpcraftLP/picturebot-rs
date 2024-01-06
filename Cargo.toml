@@ -27,7 +27,7 @@ anyhow = "1.0.79"
 dotenvy = "0.15.7"
 env_logger = "0.10.1"
 log = "0.4.20"
-rusty_interaction = { version = "0.2.3", features = ["handler"] }
+rusty_interaction = { version = "0.3.0", features = ["handler"] }
 tracing-subscriber = { version = "0.3.18", features = ["json"] }
 reqwest = "0.11.23"
 enum-iterator = "1.4.1"
