@@ -1,14 +1,18 @@
-mod commands;
-pub(crate) mod register;
-
 use anyhow::Context;
 use rusty_interaction::handler::InteractionHandler;
 use rusty_interaction::types::Snowflake;
 
-#[derive(Debug, Copy, Clone)]
+use crate::discord::webhook::Webhook;
+
+mod commands;
+pub(crate) mod register;
+mod webhook;
+
+#[derive(Debug, Clone)]
 pub struct BotInfo {
     pub app_id: Snowflake,
     pub owner_id: Snowflake,
+    pub webhooks: Option<Vec<Webhook>>,
 }
 
 pub(crate) async fn init() -> anyhow::Result<InteractionHandler> {
@@ -28,11 +32,26 @@ pub(crate) async fn init() -> anyhow::Result<InteractionHandler> {
         .context("DISCORD_BOT_OWNER_ID not set")?.parse()
         .context("DISCORD_BOT_OWNER_ID is not a valid Snowflake")?;
 
+    let webhooks = std::env::var("DISCORD_WEBHOOK_URLS")
+        .ok()
+        .map(|s| s
+            .split(',')
+            .filter_map(|s| match Webhook::new(s.to_string()) {
+                Ok(webhook) => Some(webhook),
+                Err(e) => {
+                    log::error!("Failed to create webhook: {e}");
+                    None
+                }
+            })
+            .collect::<Vec<Webhook>>()
+        );
+
     let mut handler = InteractionHandler::new(app_id, public_key, Some(&token));
 
     handler.add_data(BotInfo {
         app_id,
         owner_id,
+        webhooks,
     });
 
     commands::register_commands(&mut handler);

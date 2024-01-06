@@ -1,7 +1,10 @@
-use rusty_interaction::{defer, slash_command};
+use chrono::Utc;
+use rusty_interaction::{Builder, defer, slash_command};
 use rusty_interaction::handler::InteractionHandler;
-use rusty_interaction::types::interaction::{Context, InteractionResponse};
+use rusty_interaction::types::embed::{EmbedBuilder, EmbedField};
+use rusty_interaction::types::interaction::{Context, InteractionResponse, WebhookMessage};
 use rusty_interaction::types::Snowflake;
+use crate::discord::BotInfo;
 
 use crate::upload::{Uploader, UploaderImpl};
 use crate::util::UploadValidator;
@@ -11,6 +14,7 @@ const DISALLOWED_CHARACTERS: [char; 31] = ['(', ')', '[', ']', '{', '}', '-', '+
 #[defer]
 #[slash_command]
 pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Context) -> InteractionResponse {
+    let bot = handler.data.get::<BotInfo>().unwrap();
     let validator = handler.data.get::<UploadValidator>().unwrap();
     let uploader = handler.data.get::<Uploader>().unwrap();
 
@@ -69,6 +73,39 @@ pub(crate) async fn upload_command(handler: &mut InteractionHandler, ctx: Contex
     match uploader.upload(&filename, bytes, &content_type).await {
         Ok(result) => {
             log::info!("Successfully uploaded file at {result}");
+
+            if let Some(webhooks) = &bot.webhooks {
+
+                let message = WebhookMessage {
+                    username: Some("PictureBot".to_string()),
+                    embeds: Some(vec![EmbedBuilder::default()
+                        .title("New upload")
+                        .add_field(EmbedField::default()
+                            .name("Discord User")
+                            .value(format!("`{user_id:width$}` <@{user_id}>", user_id = ctx.interaction.member.clone().map(|m| m.user.id).unwrap_or(0), width = 20))
+                        )
+                        .add_field(EmbedField::default()
+                            .name("URL")
+                            .value(format!("<{result}>"))
+                        )
+                        .timestamp(Utc::now())
+                        .build().unwrap()
+                    ]),
+                    ..Default::default()
+                };
+
+                for webhook in webhooks {
+                    match webhook.send(&message).await {
+                        Ok(_) => {
+                            log::debug!("Successfully dispatched webhook request to {}", webhook.url);
+                        },
+                        Err(e) => {
+                            log::error!("Failed to send webhook request to {}: {}", webhook.url, e);
+                        }
+                    }
+                }
+            }
+
             ctx.respond().content(format!("successfully uploaded as <{result}>")).finish()
         }
         Err(e) => {
