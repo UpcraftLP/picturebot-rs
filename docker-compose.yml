@@ -1,0 +1,12 @@
+services:
+  app:
+    image: ghcr.io/upcraftlp/picturebot-rs:latest
+    ports:
+      - "3000:3000"
+    environment:
+      UPLOAD_PROVIDER: http_bearer
+      DISCORD_ALLOWED_FILE_EXTENSIONS: png=1000000,jpg=1000000,jpeg=1000000,ogv=40000000
+      FRONTEND_URL_MAX_LENGTH: 90
+    # get secret values from .env file
+    env_file:
+      - .env

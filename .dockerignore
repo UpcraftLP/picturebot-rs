@@ -1,0 +1,9 @@
+README.md
+LICENSE.md
+*.env
+env.*
+
+docker-compose.yml
+docker-compose.*.yml
+
+Cargo.lock
