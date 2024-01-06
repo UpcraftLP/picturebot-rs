@@ -1,0 +1,36 @@
+[package]
+name = "picturebot"
+repository = "https://github.com/UpcraftLP/picturebot-rs"
+description = "A Discord bot to upload images to a web server"
+license-file = "LICENSE.md"
+authors = ["Up <up@upcraft.dev>"]
+version = "0.1.0"
+edition = "2021"
+default-run = "picturebot"
+build = "build.rs"
+
+[[bin]]
+name = "picturebot"
+path = "src/main.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.4.1"
+anyhow = "1.0.79"
+dotenvy = "0.15.7"
+env_logger = "0.10.1"
+log = "0.4.20"
+rusty_interaction = { version = "0.2.3", features = ["handler"] }
+tracing-subscriber = { version = "0.3.18", features = ["json"] }
+reqwest = "0.11.23"
+enum-iterator = "1.4.1"
+serde_json = "1.0.111"
+serde = { version = "1.0.194", features = ["derive"] }
+enum_dispatch = "0.3.12"
+
+[build-dependencies]
+built = { version = "0.7.1", features = ["chrono", "git2"] }
+
+[patch.crates-io]
+rusty_interaction = { git = "https://github.com/UpcraftLP/rusty-interaction.git", branch = "update" }
