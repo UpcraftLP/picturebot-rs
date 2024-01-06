@@ -1,13 +1,19 @@
 [package]
-name = "picturebot"
-repository = "https://github.com/UpcraftLP/picturebot-rs"
-description = "A Discord bot to upload images to a web server"
-license-file = "LICENSE.md"
-authors = ["Up <up@upcraft.dev>"]
+name = "discord-picture-bot"
 version = "0.1.0"
 edition = "2021"
-default-run = "picturebot"
 build = "build.rs"
+default-run = "picturebot"
+
+license-file = "LICENSE.md"
+readme = "README.md"
+homepage = "https://github.com/UpcraftLP/picturebot-rs"
+repository = "https://github.com/UpcraftLP/picturebot-rs"
+
+authors = ["Up <up@upcraft.dev>"]
+description = "A Discord bot to upload images to a web server"
+categories = ["web-programming", "network-programming", "encoding", "database"]
+keywords = ["discord", "bot", "image", "picture", "upload"]
 
 [[bin]]
 name = "picturebot"
