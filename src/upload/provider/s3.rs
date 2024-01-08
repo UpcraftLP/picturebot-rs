@@ -3,6 +3,8 @@ use std::env;
 use anyhow::Context;
 use s3::{Bucket, Region};
 use s3::creds::Credentials;
+use s3::error::S3Error;
+use s3::serde_types::HeadObjectResult;
 
 use crate::upload::UploaderImpl;
 
@@ -14,7 +16,6 @@ pub struct S3Uploader {
 }
 
 impl S3Uploader {
-
     pub(crate) fn new(frontend_url: &str, credentials: Credentials, region: Region, bucket_name: &str, use_path_style: bool, storage_path: Option<&str>) -> anyhow::Result<Self> {
         let mut bucket = Bucket::new(bucket_name, region, credentials)?;
 
@@ -41,6 +42,11 @@ impl S3Uploader {
     }
 
     pub(crate) fn from_env() -> anyhow::Result<Self> {
+
+        //FIXME use own keys (S3_*), not AWS_*
+
+        //FIXME make AWS_REGION optional when AWS_ENDPOINT is set (just default to "custom")
+
         // AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SECURITY_TOKEN, AWS_SESSION_TOKEN
         let credentials = Credentials::from_env()?;
         // AWS_ENDPOINT, AWS_REGION
@@ -63,11 +69,38 @@ impl S3Uploader {
 }
 
 impl UploaderImpl for S3Uploader {
-    async fn upload(&self, path: &str, bytes: Vec<u8>, content_type: &str) -> anyhow::Result<String> {
-        todo!("S3Uploader::upload")
+    async fn upload(&self, path: &str, bytes: Vec<u8>, _content_type: &str) -> anyhow::Result<String> {
+        let path = format!("{}/{}", self.storage_path, path);
+        match check_file_exists(&self.bucket, path.as_str()).await? {
+            None => {
+                self.bucket.put_object(path.as_str(), bytes.as_slice()).await?;
+                log::info!("Uploaded file to {bucket}:/{path}", bucket = &self.bucket.name);
+                Ok(self.frontend_url(path.as_str()))
+            }
+            Some(_) => anyhow::bail!("File already exists"),
+        }
     }
 
     fn frontend_url(&self, path: &str) -> String {
         format!("{}/{}", self.frontend_url, path)
+    }
+}
+
+async fn check_file_exists(bucket: &Bucket, file: &str) -> Result<Option<HeadObjectResult>, S3Error> {
+    match bucket.head_object(file).await {
+        Ok((result, status)) => {
+            if status == 200u16 {
+                return Ok(Some(result));
+            }
+            Ok(None)
+        }
+        Err(e) => {
+            if let S3Error::Http(code, _) = &e {
+                if *code == 404u16 {
+                    return Ok(None);
+                }
+            }
+            Err(e)
+        }
     }
 }
