@@ -96,7 +96,7 @@ impl UploaderImpl for S3Uploader {
         match check_file_exists(&self.bucket, path.as_str()).await? {
             None => {
                 self.bucket.put_object(path.as_str(), bytes.as_slice()).await?;
-                log::info!("Uploaded file to s3://{bucket}@{path}", bucket = &self.bucket.name);
+                log::debug!("Uploaded file to s3://{bucket}@{path}", bucket = &self.bucket.name);
                 Ok(self.frontend_url(path.as_str()))
             }
             Some(_) => anyhow::bail!("File already exists"),
