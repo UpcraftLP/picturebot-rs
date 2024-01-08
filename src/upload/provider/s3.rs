@@ -58,7 +58,7 @@ impl S3Uploader {
             None => {
                 let region_string = s3_region.unwrap();
                 Region::from_str(region_string.as_str())
-                    .context("Unknwon S3 region: {region_string}")?
+                    .context("Unknown S3 region: {region_string}")?
             }
         };
 
