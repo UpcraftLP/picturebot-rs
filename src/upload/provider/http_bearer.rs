@@ -43,8 +43,8 @@ impl HttpBearerUploader {
         }
 
         Ok(HttpBearerUploader {
-            upload_url,
-            frontend_url,
+            upload_url: upload_url_mut,
+            frontend_url: frontend_url_mut,
             client,
         })
     }
