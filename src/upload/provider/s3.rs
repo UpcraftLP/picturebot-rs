@@ -1,4 +1,5 @@
 use std::env;
+use std::str::FromStr;
 
 use anyhow::Context;
 use s3::{Bucket, Region};
@@ -42,24 +43,45 @@ impl S3Uploader {
     }
 
     pub(crate) fn from_env() -> anyhow::Result<Self> {
+        let s3_region = env::var("S3_REGION").ok();
+        let s3_url = env::var("S3_URL").ok();
 
-        //FIXME use own keys (S3_*), not AWS_*
+        if s3_region.is_none() && s3_url.is_none() {
+            anyhow::bail!("One of S3_REGION or S3_URL must be set when using S3 storage!");
+        }
 
-        //FIXME make AWS_REGION optional when AWS_ENDPOINT is set (just default to "custom")
+        let region = match s3_url {
+            Some(endpoint) => Region::Custom {
+                endpoint,
+                region: s3_region.unwrap_or("custom".to_string()),
+            },
+            None => {
+                let region_string = s3_region.unwrap();
+                Region::from_str(region_string.as_str())
+                    .context("Unknwon S3 region: {region_string}")?
+            }
+        };
 
-        // AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SECURITY_TOKEN, AWS_SESSION_TOKEN
-        let credentials = Credentials::from_env()?;
-        // AWS_ENDPOINT, AWS_REGION
-        let region = Region::from_default_env()?;
+        let access_key = env::var("S3_ACCESS_KEY_ID")
+            .context("S3_ACCESS_KEY_ID is not set")?;
+        let secret_key = env::var("S3_SECRET_ACCESS_KEY")
+            .context("S3_SECRET_ACCESS_KEY is not set")?;
 
-        let bucket_name = env::var("AWS_S3_BUCKET_NAME")
-            .context("AWS_S3_BUCKET_NAME is not set")?;
+        let security_token = env::var("S3_SECURITY_TOKEN").ok();
+        let session_token = env::var("S3_SESSION_TOKEN").ok();
+        let profile = env::var("S3_PROFILE").ok();
 
-        let use_path_style = env::var("AWS_S3_USE_PATH_STYLE")
+        let credentials = Credentials::new(Some(access_key.as_str()), Some(secret_key.as_str()), security_token.as_deref(), session_token.as_deref(), profile.as_deref())
+            .context("Failed to create S3 credentials")?;
+
+        let bucket_name = env::var("S3_BUCKET_NAME")
+            .context("S3_BUCKET_NAME is not set")?;
+
+        let use_path_style = env::var("S3_USE_PATH_STYLE")
             .map(|s| s.parse::<bool>()).ok().transpose()
-            .context("Failed to parse AWS_S3_USE_PATH_STYLE")?.unwrap_or(false);
+            .context("Failed to parse S3_USE_PATH_STYLE")?.unwrap_or(false);
 
-        let storage_path = env::var("AWS_S3_STORAGE_PATH").unwrap_or("".to_string());
+        let storage_path = env::var("S3_STORAGE_PATH").unwrap_or("".to_string());
 
         let frontend_url = env::var("UPLOAD_FRONTEND_URL")
             .context("UPLOAD_FRONTEND_URL must be set when using S3 storage")?;
